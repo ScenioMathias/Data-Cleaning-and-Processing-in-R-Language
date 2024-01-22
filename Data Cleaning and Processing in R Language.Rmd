@@ -1,0 +1,274 @@
+*Data Cleaning and Processing with R Language*
+
+*Step I*
+
+First, the file is imported.
+
+In our scenario, we perform the import of the 'Churn.csv' file, separated by commas.
+
+```{r}
+dados = read.csv("Churn.csv", sep = ";", na.strings="", stringsAsFactors=T)
+```
+Now, through the two commands below, we will analyze the data from the file we just imported.
+```{r}
+head(dados)
+summary(dados)
+```
+
+*Step II*
+
+Through the above code, we can conclude that the columns are not named in a way that we can identify and process them. Therefore, the next step will be to name them. For this, we will execute the following command below:
+```{r}
+colnames(dados) = c("Id","Score","Estado","Genero","Idade","Patrimonio","Saldo","Produtos","TemCartCredito","Ativo","Salario","Saiu")
+head(dados)
+```
+
+*Step III*
+
+After naming the column, we will move on to the next step. The next step is to analyze the data of the categories, plotting graphs through variables that will receive the column we need to analyze in order to try to obtain some details.
+
+We will start with the "Estados" (States) column since we began our analysis with categorical data.
+```{r}
+count = table(dados$Estado)
+barplot(count, main="Estados", xlab="Estados")
+```
+
+After plotting the graph, we noticed that the states RP, SP, TD have few indicators compared to the others. Therefore, we need to handle these data. 
+
+Let's do the same now with the "gênero" (gender) column.
+
+```{r}
+count = table(dados$Genero)
+barplot(count, main="Genero", xlab="Generos")
+```
+
+*Step IV*
+
+After plotting the graph, we noticed that the genders are not consistent because there are various different mentions of the same term, such as M and Masculino, or F and Fem for feminino. Therefore, we should handle them.
+
+Now, we will move on to the numerical columns, starting with the "Score" column.
+
+We will use the following commands to analyze the columns.
+
+```{r}
+summary(dados$Score)
+boxplot(dados$Score)
+hist(dados$Score)
+```
+Based on both commands, we can analyze the dispersion of the numbers, helping to identify any anomalies.
+
+Now, let's move on to the "Imagem" (Image) column.
+
+```{r}
+summary(dados$Idade)
+boxplot(dados$Idade)
+hist(dados$Idade)
+```
+
+Through the above codes, we were able to obtain some details of possible data conflicts, showing negative indicators for age, which we know is an impossible scenario for age. There are also indicators of 180, which is also an unlikely scenario for age. However, we have observed that, in a certain way, the data is generally consistent, with only the minimum and maximum values having these anomalies. Therefore, we need to address these issues.
+
+Now, let's analyze the "Saldo" (Balance) column.
+
+```{r}
+summary(dados$Saldo)
+boxplot(dados$Saldo)
+hist(dados$Saldo)
+```
+
+Through the three commands, we can analyze how the graph is dispersed, showing a significant number of indicators with a value of 0, which could be a point for future analysis. The other indicators seem to follow a consistent pattern.
+
+Now, let's analyze the "Salário" (Salary) column.
+
+```{r}
+summary(dados$Salario)
+boxplot(dados$Salario)
+hist(dados$Salario)
+```
+
+*Step V*
+
+Through the commands, we can conclude that there are missing values in the column, which could potentially hinder future data analyses or projects involving AI.
+
+Therefore, after completing the analyses, we will proceed to remove the missing data in the columns. To do this, we will execute the command below:
+```{r}
+dados[!complete.cases(dados),]
+```
+
+Through the search for missing data in the command above, we can analyze which columns, "Gênero" (Gender) and "Salário" (Salary), contain these missing data, and we can handle them. Let's start with the "Salário" column by executing the commands below:
+
+```{r}
+summary(dados$Salario)
+
+```
+We have 7 NAs in this column. To handle missing numerical data, we treat it with the median of the numbers presented in the column. Therefore, let's identify the median of the column. Additionally, when obtaining the median, we should remove the NAs from the filter to ensure an accurate calculation. The code is provided below:
+```{r}
+median(dados$Salario, na.rm = T)
+```
+Now, let's assign the median value to the NAs in the "Salário" (Salary) column. See the code below:
+```{r}
+dados[is.na(dados$Salario),]$Salario = median(dados$salario,na.rm = T)
+```
+Now, let's analyze again to see if there are any NA values in the "Salário" (Salary) column.
+```{r}
+dados[!complete.cases(dados$Salario),]
+```
+Great, we received feedback that there are no more NA values.
+
+Now, let's move on to analyzing the "Gênero" (Gender) column. Since this column contains categorical data, the approach will be different. Let's reevaluate this column using the commands.
+```{r}
+summary(dados$Genero)
+```
+
+*Step VI*
+
+
+After obtaining the summary of indicators for this column, we noticed that the data is not consistent, so we need to handle it. The first action will be to transform the NAs into "Masculino" (Male), as "Masculino" is the most frequent information. In categorical data, we often assign the most frequent values to missing data.
+```{r}
+dados[is.na(dados$Genero) | dados$Genero == "M",]$Genero = "Masculino"
+```
+
+After this, we will run the summary command again to analyze whether the actions have been carried out.
+```{r}
+summary(dados$Genero)
+```
+Note that there are no more NA values, but there are "M" and empty entries. In this case, to address this issue, if we perform the process of transforming "F" and "Fem" into "Feminino" according to the codes below, the same issue will occur.
+```{r}
+dados[dados$Genero == "F" | dados$Genero == "Fem",]$Genero = "Feminino"
+```
+After this, we will run the summary command again to analyze whether the actions have been carried out.
+```{r}
+summary(dados$Genero)
+```
+It is noticed that "F" and "Fem" also have a zero count. In this case, they remain because they are in the domain since they previously had values. To resolve this, we should remove the indices from the domain. See the code below:
+```{r}
+dados$Genero = factor(dados$Genero)
+```
+Now, let's validate whether they have been removed.
+```{r}
+summary(dados$Genero)
+```
+
+Great, it's resolved.
+
+The next step will be to correct the ages that are outside the expected ranges.
+
+```{r}
+summary(dados$Idade)
+```
+
+*Step VII*
+
+As we can see, there are negative values and values up to 140.
+
+Now, let's work within this range using the filter below.
+```{r}
+dados[dados$Idade<0 | dados$Idade >110,]$Idade
+```
+
+We have 3 values that fall within the specified range. The next step is to check if there are no NA values in this column. To do this, let's execute the code below:
+
+```{r}
+dados[is.na(dados$Idade),]
+```
+
+As a result, the table does not contain empty values. Now, let's proceed to work on the 3 values found outside the specified range.
+
+Considering that it's a numerical data, we will assign the median value to the 3 values found outside the domain. Let's do that as follows:
+
+```{r}
+dados[dados$Idade<0 | dados$Idade >110,]$Idade = median(dados$Idade)
+```
+
+Now, let's validate whether the actions have been carried out.
+
+```{r}
+summary(dados$Idade)
+```
+Great, now the data is within the domain.
+
+Now, let's move on to the analysis of duplicate data. Analyzing duplicate data is a more complex task because we need to carefully handle certain fields that can legitimately have repeated values, such as age, gender, among others. Therefore, let's analyze the columns and try to identify any potential issues.
+```{r}
+head(dados)
+```
+
+*Step VIII*
+
+The ID is a column where the data should not be repeated. Let's proceed with the analysis of this column. See how we will proceed.
+```{r}
+x = dados[duplicated(dados$Id),]
+x
+```
+
+In this case, we noticed that the row index sequence is 82, but the ID is marked as 81, indicating that this row is duplicated. Therefore, we will remove row 82 by searching for its index using the code below.
+```{r}
+dados = dados[-c(82),]
+dados
+```
+Now, let's search for the duplicated value again to confirm the action.
+```{r}
+x = dados[duplicated(dados$Id),]
+x
+```
+
+*Step IX*
+
+Resolved. Now, let's move on to the "estado" (state) column. Let's analyze it again by looking at the summary of the table.
+```{r}
+count = table(dados$Estado)
+barplot(count, main= "Estado", xlab= "Estado")
+```
+The indices RP, SP, and TD are not part of the domain, so we will transform them using the mode. See the code below.
+```{r}
+dados[!dados$Estado %in% c("RS","SC","PR"),]$Estado ="RS"
+```
+
+Now, let's analyze whether the actions have been carried out.
+```{r}
+summary(dados$Estado)
+
+```
+It is noted that the indices still exist but are now zeroed. Now, let's remove them from the domain.
+```{r}
+dados$Estado = factor(dados$Estado)
+summary(dados$Estado)
+```
+Great, it's resolved.
+
+Finally, we will handle the outliers, i.e., values that are outside the standard range. Let's analyze this pattern in the "salário" (salary) column. See below.
+```{r}
+summary(dados$Salario)
+boxplot(dados$Salario)
+hist(dados$Salario)
+```
+See that there are values outside the standard deviation. Therefore, let's use the command to obtain these data.
+```{r}
+desv = sd(dados$Salario, na.rm = T)
+desv
+```
+See that this value is the standard deviation of the "salário" (salary) column. Therefore, let's move on to the next step to analyze the values that are outside the standard deviation.
+
+```{r}
+dados[dados$Salario>=2 *desv,]$Salario
+```
+
+We found these values, which are equal to or above 2 times the standard deviation. Therefore, let's replace these values with the mean of the salary. Below, through the boxplot command, we can also visually see the 4 values.
+
+```{r}
+boxplot(dados$Salario)
+```
+I can also filter through the command to obtain values without outliers and with outliers, see below.
+```{r}
+boxplot(dados$Salario, outline = F)
+x = boxplot(dados$Salario)$out
+x
+```
+Updating values with the median now.
+```{r}
+median(dados$Salario)
+dados[dados$Salario >= 2 * desv ,]$Salario = median(dados$Salario)
+```
+Now, let's test again.
+```{r}
+boxplot(dados$Salario)
+```
+Great, the data has been adjusted.
