@@ -1,0 +1,120 @@
+*Data Cleaning and Processing with R Language*
+
+In step I, we will import the 'tempo.csv' file, which contains values for Appearance, Temperature, Humidity, and Play. See below for the data loading process.
+```{r}
+dados = read.csv(file.choose(), header=TRUE, sep=";")
+head(dados)
+
+```
+
+Let's first handle categorical data, which includes Appearance, Wind, and Play. We will begin with Appearance.
+```{r}
+count = table(dados$Aparencia)
+barplot(count, main="Aparencia",xlab = "Aparencia")
+```
+
+Notice that there are data in the "Appearance" category labeled as "Less," which does not belong to the domain. Therefore, considering it is a categorical data, we will assign all "Less" values to the most frequent category, which is "Sunny." Before proceeding with the process, let's validate if the column does not have any NA's.
+```{r}
+dados[is.na(dados$Aparencia),]
+```
+
+After confirming that there are no NA's, we will assign the indicators of the "Less" category to the "Sunny" category.
+```{r}
+dados[dados$Aparencia == "menos",]$Aparencia = "sol"
+
+```
+
+```{r}
+count = table(dados$Aparencia)
+count
+barplot(count, main="Aparencia",xlab = "Aparencia")
+```
+
+Now the data in the "Appearance" column is treated.
+
+The next column to analyze will be the "Wind" column. Let's take a look.
+```{r}
+count = table(dados$Vento)
+barplot(count, main="Vento", xlab="vento")
+count
+```
+
+Let's assign the out-of-domain values to the "False" category in the same way we handled the "Appearance" column. But first, let's check if there are any NA values in the "Wind" column.
+```{r}
+dados[is.na(dados$Vento),]
+```
+
+Now we'll proceed with the treatment.
+```{r}
+dados[dados$Vento == "",]$Vento = "FALSO"
+
+```
+
+Now, let's validate if the actions have been executed.
+```{r}
+count = table(dados$Vento)
+barplot(count, main="Vento", xlab="vento")
+count
+```
+
+Now the data in the "wind" column is in accordance with the domain. Next, we will analyze the "play" column.
+```{r}
+dados[is.na(dados$Jogar),]
+```
+
+```{r}
+count = table(dados$Jogar)
+barplot(count, main = "Jogar", xlab = "Jogar")
+count
+```
+
+From what we can see, everything is okay. Now, let's handle the columns with numerical data, analyzing if they belong to the domain. The domain usually consists of interval rules or values that the data should follow. For example, age cannot be less than 0. Thinking about this, let's start the data analysis treatment on the temperature column.
+```{r}
+summary(dados$Temperatura)
+boxplot(dados$Temperatura)
+hist(dados$Temperatura)
+```
+
+Here we can notice that there are temperatures above the allowed range in the domain, which has an interval of -130 to 130 F. In this case, we will filter out the values that are not in this range and replace them with the median of the values.
+```{r}
+media = median(dados$Temperatura)
+media
+dados[dados$Temperatura < -130 | dados$Temperatura > 130,]$Temperatura = media
+```
+
+Now let's validate the changes.
+```{r}
+dados[dados$Temperatura < -130 | dados$Temperatura > 130,]$Temperatura
+summary(dados$Temperatura)
+boxplot(dados$Temperatura)
+hist(dados$Temperatura)
+
+```
+
+Here we can see that there are humidity values outside the allowed range, which has an interval of 0 to 100%. In this case, we will filter out the values that are not within this range and assign them the median of the values.
+```{r}
+summary(dados$Umidade)
+boxplot(dados$Umidade)
+hist(dados$Umidade)
+```
+
+As defined by the domain, the range of values for humidity is from 0 to 100. As observed above, there are values outside this domain, so we will address them.
+```{r}
+dados[dados$Umidade < 0 | dados$Umidade > 100,]$Umidade 
+```
+
+We identified that there are two values, one 'NA' and the other '200'.
+In this case, we will handle both.
+```{r}
+dados[is.na(dados$Umidade),] = median(dados$Umidade, na.rm = TRUE)
+dados[dados$Umidade < 0 | dados$Umidade > 100,]$Umidade =  median(dados$Umidade)
+```
+
+After this, we can check if the actions have been resolved.
+```{r}
+summary(dados$Umidade)
+boxplot(dados$Umidade)
+hist(dados$Umidade)
+```
+
+Ready, now the data is clean and processed, ready to be loaded for analysis or implementation of any model.
