@@ -14,7 +14,12 @@ Posteriorly:
 ![Screenshot_4](https://github.com/ScenioMathias/Data-Cleaning-and-Processing-in-R-Language/assets/72087549/0a1d373c-c9d3-4c83-99c1-7748b3a5e67f)
 
 
-Boxplot graph showing the change in Age data after data cleaning treatments.
+Boxplot graph showing the adjustments made during the exploratory analysis process, where data deviating from the domain and business rules were identified.
+
+Previously:
 
 ![Screenshot_6](https://github.com/ScenioMathias/Data-Cleaning-and-Processing-in-R-Language/assets/72087549/c8dc8050-8842-4d6e-828d-5b7e44a2e690)
+
+Posteriorly:
+
 ![Screenshot_5](https://github.com/ScenioMathias/Data-Cleaning-and-Processing-in-R-Language/assets/72087549/a277b05e-3c6d-4115-9958-ea3c3de6b6ba)
